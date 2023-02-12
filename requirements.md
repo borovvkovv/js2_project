@@ -18,12 +18,6 @@ npm i eslint@8.28.0 -DE
 
 - eslint@8.28.0
 - eslint-config-htmlacademy@8.0.0
-- webpack@5.75.0
-- webpack-cli@5.0.0
-- webpack-dev-server@4.11.1
-- copy-webpack-plugin@11.0.0
-- @babel/core@7.20.5
-- @babel/preset-env@7.20.2
-- babel-loader@9.1.0
+- 
 - css-loader@6.7.2
 - style-loader@3.3.1
