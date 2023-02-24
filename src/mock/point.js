@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {getRandomItem, getRandomNumber} from '../../utils';
+import {getRandomItem, getRandomNumber} from '../utils/common.js';
 import {pointTypes} from './enums';
 import {destinations} from './destinations.js';
 

@@ -73,9 +73,9 @@ export default class PointView extends AbstractView {
     return createPointTemplate(this.#point, this.#offers, this.#destination);
   }
 
-  #rollupBtnClickHandler(evt) {
+  #rollupBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleRollupBtnClick();
-  }
+  };
 
 }

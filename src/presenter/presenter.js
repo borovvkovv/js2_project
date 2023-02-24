@@ -74,7 +74,7 @@ export default class Presenter {
     });
 
     function replaceCardToForm() {
-      replace(pointEditor, pointCard.element);
+      replace(pointEditor, pointCard);
     }
 
     function replaceFormToCard() {
@@ -87,7 +87,7 @@ export default class Presenter {
   init() {
 
     this.#points = [...this.#pointsModel.points];
-    render(new FilterView(), document.body.querySelector('.trip-controls__filters'));
+
     if (this.#points.length === 0) {
       render(new NoTasksView(), document.body.querySelector('.trip-events'));
     }

@@ -1,17 +1,35 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
-function createFilterTemplate() {
+/**
+ *
+ * @param {filterState[]} filtersStates
+ */
+function getFilters(filtersStates)
+{
+  return filtersStates.map((filterState) =>
+    `<div class="trip-filters__filter">
+      <input
+        id="filter-${filterState.name}"
+        class="trip-filters__filter-input  visually-hidden"
+        type="radio"
+        name="trip-filter"
+        value="${filterState.name}"
+        ${filterState.isAnyPoints ? '' : 'disabled'}
+      >
+      <label
+        class="trip-filters__filter-label"
+        for="filter-${filterState.name}"
+      >
+        ${filterState.name}
+      </label>
+    </div>`
+  ).join('');
+}
+
+function createFilterTemplate(filtersStates) {
   return `
     <form class="trip-filters" action="#" method="get">
-      <div class="trip-filters__filter">
-        <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" checked>
-        <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
-      </div>
-
-      <div class="trip-filters__filter">
-        <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
-        <label class="trip-filters__filter-label" for="filter-future">Future</label>
-      </div>
+      ${getFilters(filtersStates)}
 
       <button class="visually-hidden" type="submit">Accept filter</button>
     </form>`;
@@ -19,8 +37,20 @@ function createFilterTemplate() {
 
 export default class FilterView extends AbstractView {
 
+  #filtersStates;
+
+  /**
+   * @constructor
+   * @param {filterState[]} filtersStates
+   */
+  constructor(filtersStates) {
+    super();
+
+    this.#filtersStates = filtersStates;
+  }
+
   get template() {
-    return createFilterTemplate();
+    return createFilterTemplate(this.#filtersStates);
   }
 
 }

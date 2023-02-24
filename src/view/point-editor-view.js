@@ -216,14 +216,14 @@ export default class PointEditorView extends AbstractView {
     });
   }
 
-  #formSubmitHandler(evt) {
+  #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit();
-  }
+  };
 
-  #rollupBtnClickHandler(evt) {
+  #rollupBtnClickHandler = (evt) => {
     evt.preventDefault();
     this.#handleRollupBtnClick();
-  }
+  };
 
 }

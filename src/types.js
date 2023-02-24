@@ -42,6 +42,20 @@
  * @property {Offer} offer
  */
 
+////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @typedef filterState
+ * @property {string} filterName
+ * @property {boolean} isAnyPoints
+ */
+
+/**
+ * @callback FilterCallback
+ * @param {Point[]} points
+ * @return {Point[]}
+ */
+
 /**
  * @typedef {import('./model/points-model').default} PointsModel
  */
