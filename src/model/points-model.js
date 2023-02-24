@@ -5,8 +5,8 @@ import {destinations} from '../mock/destinations';
 
 export default class PointsModel {
 
-  offers = offers;
-  destinations = destinations;
+  #offers = offers;
+  #destinations = destinations;
   #points = Array.from({length: 10}).map(() => getRandomPoint(this));
 
   get points() {
@@ -14,11 +14,15 @@ export default class PointsModel {
   }
 
   getDestinationById(id) {
-    return this.destinations.find((item) => item.id === id);
+    return this.#destinations.find((item) => item.id === id);
   }
 
   getOffersByType(type) {
-    return this.offers.find((item) => item.type === type).offers;
+    return this.#offers.find((item) => item.type === type).offers;
+  }
+
+  getCitiesNames() {
+    return [...new Set(this.#destinations.map((destination) => destination.name))];
   }
 
 }

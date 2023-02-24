@@ -1,14 +1,10 @@
 import {createElement} from '../render.js';
 
-/**
- *
- * @returns string
- */
-function createNewPointButtonTemplate() {
-  return '<button class="trip-main__event-add-btn  btn  btn--big  btn--yellow" type="button">New event</button>';
+function createNoTasksTemplate() {
+  return '<p class="trip-events__msg">Click New Event to create your first point</p>';
 }
 
-export default class NewPointButtonView {
+export default class NoTasksView {
 
   /**
    * @type Element
@@ -16,7 +12,7 @@ export default class NewPointButtonView {
   #element = null;
 
   #getTemplate() {
-    return createNewPointButtonTemplate();
+    return createNoTasksTemplate();
   }
 
   get element() {

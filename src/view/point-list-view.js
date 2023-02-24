@@ -6,19 +6,24 @@ function createPointListTemplate() {
 
 export default class PointListView {
 
-  getTemplate() {
+  /**
+   * @type Element
+   */
+  #element = null;
+
+  #getTemplate() {
     return createPointListTemplate();
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.#getTemplate());
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }

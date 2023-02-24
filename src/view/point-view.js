@@ -48,20 +48,20 @@ function createPointTemplate(point, offers, destination) {
 export default class PointView {
 
   /**
-   * @type {Point}
+   * @type Element
    */
+  #element = null;
+
   #point;
-
-  /**
-   * @type {Offer[]}
-   */
   #offers;
-
-  /**
-   * @type {Destination}
-   */
   #destination;
 
+  /**
+   * @param {object} param
+   * @param {Point} param.point
+   * @param {Destination} param.destination
+   * @param {Offers[]} param.offers
+   */
   constructor({point, destination, offers}) {
     this.#point = point;
     this.#offers = offers;
@@ -72,15 +72,18 @@ export default class PointView {
     return createPointTemplate(this.#point, this.#offers, this.#destination);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.#getTemplate());
+  /**
+   * @returns Element
+   */
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.#getTemplate());
     }
 
-    return this.element;
+    return this.#element;
   }
 
   removeElement() {
-    this.element = null;
+    this.#element = null;
   }
 }
