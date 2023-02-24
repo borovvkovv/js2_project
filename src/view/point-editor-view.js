@@ -1,6 +1,6 @@
-import {createElement} from '../render.js';
 import {pointTypes} from '../mock/enums';
 import dayjs from 'dayjs';
+import AbstractView from '../framework/view/abstract-view.js';
 
 /**
  * @returns string
@@ -173,18 +173,15 @@ function createPointEditorTemplate({point, destination, offers, isNew, cities}) 
     </li>`;
 }
 
-export default class PointEditorView {
-
-  /**
-   * @type Element
-   */
-  #element = null;
+export default class PointEditorView extends AbstractView {
 
   #point;
   #destination;
   #offers;
   #cities;
   #isNew;
+  #handleFormSubmit;
+  #handleRollupBtnClick;
 
   /**
    * @param {Object} param
@@ -194,15 +191,22 @@ export default class PointEditorView {
    * @param {string[]} param.cities
    * @param {boolean} param.isNew
    */
-  constructor({point, offers, destination, cities, isNew}) {
+  constructor({point, offers, destination, cities, isNew, onFormSubmit, onRollupBtnClick}) {
+    super();
+
     this.#point = point;
     this.#destination = destination;
     this.#offers = offers;
     this.#cities = cities;
     this.#isNew = isNew;
+    this.#handleFormSubmit = onFormSubmit;
+    this.#handleRollupBtnClick = onRollupBtnClick;
+
+    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupBtnClickHandler);
   }
 
-  #getTemplate() {
+  get template() {
     return createPointEditorTemplate({
       point: this.#point,
       destination: this.#destination,
@@ -212,15 +216,14 @@ export default class PointEditorView {
     });
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.#getTemplate());
-    }
-
-    return this.#element;
+  #formSubmitHandler(evt) {
+    evt.preventDefault();
+    this.#handleFormSubmit();
   }
 
-  removeElement() {
-    this.#element = null;
+  #rollupBtnClickHandler(evt) {
+    evt.preventDefault();
+    this.#handleRollupBtnClick();
   }
+
 }

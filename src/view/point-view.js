@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
 import dayjs from 'dayjs';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function getOffers(offers, checkedOffers) {
   return offers.map((offer) =>
@@ -45,16 +45,12 @@ function createPointTemplate(point, offers, destination) {
   </li >`;
 }
 
-export default class PointView {
-
-  /**
-   * @type Element
-   */
-  #element = null;
+export default class PointView extends AbstractView {
 
   #point;
   #offers;
   #destination;
+  #handleRollupBtnClick;
 
   /**
    * @param {object} param
@@ -62,28 +58,24 @@ export default class PointView {
    * @param {Destination} param.destination
    * @param {Offers[]} param.offers
    */
-  constructor({point, destination, offers}) {
+  constructor({point, destination, offers, onRollupBtnClick}) {
+    super();
+
     this.#point = point;
     this.#offers = offers;
     this.#destination = destination;
+    this.#handleRollupBtnClick = onRollupBtnClick;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupBtnClickHandler);
   }
 
-  #getTemplate() {
+  get template() {
     return createPointTemplate(this.#point, this.#offers, this.#destination);
   }
 
-  /**
-   * @returns Element
-   */
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.#getTemplate());
-    }
-
-    return this.#element;
+  #rollupBtnClickHandler(evt) {
+    evt.preventDefault();
+    this.#handleRollupBtnClick();
   }
 
-  removeElement() {
-    this.#element = null;
-  }
 }

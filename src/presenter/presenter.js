@@ -1,4 +1,4 @@
-import {render} from '../render.js';
+import {render, replace} from '../framework/render.js';
 import FilterView from '../view/filter-view';
 import Sortview from '../view/sort-view';
 import pointListView from '../view/point-list-view';
@@ -35,10 +35,21 @@ export default class Presenter {
    */
   #renderPoint(point) {
 
+    const onEscDownHandler = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceFormToCard.call(this);
+      }
+    };
+
     const pointCard = new PointView({
       point,
       destination: this.#pointsModel.getDestinationById(point.id),
-      offers: this.#pointsModel.getOffersByType(point.type)
+      offers: this.#pointsModel.getOffersByType(point.type),
+      onRollupBtnClick: () => {
+        replaceCardToForm.call(this);
+        document.addEventListener('keydown', onEscDownHandler, {once: true});
+      }
     });
 
     const pointEditor = new PointEditorView({
@@ -51,44 +62,24 @@ export default class Presenter {
           })),
       destination: this.#pointsModel.getDestinationById(point.id),
       cities: this.#pointsModel.getCitiesNames(),
-      isNew: false
-    });
-
-    const replaceCardToForm = () => {
-      this.#pointListView.element.replaceChild(pointEditor.element, pointCard.element);
-    };
-
-    const replaceFormToCard = () => {
-      this.#pointListView.element.replaceChild(pointCard.element, pointEditor.element);
-    };
-
-    const onEscDownHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
+      isNew: false,
+      onFormSubmit: () => {
+        replaceFormToCard.call(this);
+        document.removeEventListener('keydown', onEscDownHandler);
+      },
+      onRollupBtnClick: () => {
         replaceFormToCard();
+        document.removeEventListener('keydown', onEscDownHandler);
       }
-    };
-
-    pointCard.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceCardToForm();
-      document.addEventListener('keydown', onEscDownHandler, {once: true});
     });
 
-    pointEditor.element.querySelector('form').addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceFormToCard();
-      document.removeEventListener('keydown', onEscDownHandler);
-    });
+    function replaceCardToForm() {
+      replace(pointEditor, pointCard.element);
+    }
 
-    pointEditor.element.querySelector('form').addEventListener('submit', (evt) => {
-      evt.preventDefault();
-      replaceFormToCard();
-    });
-
-    pointEditor.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
-      replaceFormToCard();
-      document.removeEventListener('keydown', onEscDownHandler);
-    });
+    function replaceFormToCard() {
+      replace(pointCard, pointEditor);
+    }
 
     render(pointCard, this.#pointListView.element);
   }

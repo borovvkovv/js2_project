@@ -1,29 +1,13 @@
-import {createElement} from '../render.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createNoTasksTemplate() {
   return '<p class="trip-events__msg">Click New Event to create your first point</p>';
 }
 
-export default class NoTasksView {
+export default class NoTasksView extends AbstractView {
 
-  /**
-   * @type Element
-   */
-  #element = null;
-
-  #getTemplate() {
+  get template() {
     return createNoTasksTemplate();
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.#getTemplate());
-    }
-
-    return this.#element;
-  }
-
-  removeElement() {
-    this.#element = null;
-  }
 }
