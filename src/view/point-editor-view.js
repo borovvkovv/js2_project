@@ -24,12 +24,12 @@ function getOffers(offers) {
     `<div class="event__offer-selector">
         <input
           class="event__offer-checkbox  visually-hidden"
-          id="event-offer-${offer.id}"
+          id="${offer.id}"
           type="checkbox"
           name="event-offer"
           ${checked && 'checked'}
         >
-        <label class="event__offer-label" for="event-offer-${offer.id}">
+        <label class="event__offer-label" for="${offer.id}">
           <span class="event__offer-title">${offer.title}</span>
           &plus;&euro;&nbsp;
           <span class="event__offer-price">${offer.price}</span>
@@ -96,9 +96,7 @@ function createPointEditorTemplate({point, destination, offers, isNew, cities}) 
           </div>
 
           <div class="event__field-group  event__field-group--destination">
-            <label class="event__label  event__type-output" for="event-destination-1">
-              ${type}
-            </label>
+            <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
             <datalist id="destination-list-1">
               ${getCities(cities)}
@@ -218,7 +216,18 @@ export default class PointEditorView extends AbstractView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit();
+
+    const newPoint = {
+      'id': this.#point.id,
+      'basePrice': Number.parseInt(this.element.querySelector('#event-price-1').value, 10),
+      'dateFrom': Date(this.element.querySelector('#event-start-time-1').value),
+      'dateTo': Date(this.element.querySelector('#event-end-time-1').value),
+      'destination': this.element.querySelector('#event-destination-1').value,
+      'offers': [...this.element.querySelectorAll('.event__offer-checkbox:checked')].map((element) => Number(element.id)),
+      'type': this.element.querySelector('.event__type-output').textContent
+    };
+
+    this.#handleFormSubmit(newPoint);
   };
 
   #rollupBtnClickHandler = (evt) => {

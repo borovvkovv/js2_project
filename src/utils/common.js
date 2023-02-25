@@ -9,3 +9,7 @@ export function getRandomItem(array) {
 
   return array[getRandomNumber(0, maxIndex)];
 }
+
+export function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
