@@ -57,5 +57,12 @@
  */
 
 /**
+ * @callback SortCallback
+ * @param {Point} point1
+ * @param {Point} point2
+ * @return {number}
+ */
+
+/**
  * @typedef {import('./model/points-model').default} PointsModel
  */

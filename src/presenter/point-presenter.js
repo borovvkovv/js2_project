@@ -62,7 +62,7 @@ export default class PointPresenter {
 
     this.#pointCard = new PointView({
       point,
-      destination: this.#pointsModel.getDestinationById(point.id),
+      destination: this.#pointsModel.getDestinationById(point.destination),
       offers: this.#pointsModel.getOffersByType(point.type),
       onRollupBtnClick: this.#cardRollupBtnClickHandler
     });
@@ -75,7 +75,7 @@ export default class PointPresenter {
             checked: point.offers.includes(offer.id),
             offer
           })),
-      destination: this.#pointsModel.getDestinationById(point.id),
+      destination: this.#pointsModel.getDestinationById(point.destination),
       cities: this.#pointsModel.getCitiesNames(),
       isNew: false,
       onFormSubmit: this.#formSubmitHandler,

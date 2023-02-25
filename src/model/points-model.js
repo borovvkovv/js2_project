@@ -10,7 +10,7 @@ export default class PointsModel {
   #points = Array.from({length: 10}).map(() => getRandomPoint(this));
 
   get points() {
-    return this.#points;
+    return this.#points.slice(0, 9);
   }
 
   getDestinationById(id) {

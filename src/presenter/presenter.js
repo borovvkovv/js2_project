@@ -6,6 +6,8 @@ import pointListView from '../view/point-list-view';
 import PointPresenter from './point-presenter';
 
 import NoTasksView from '../view/no-tasks-view.js';
+import {SortType} from '../const.js';
+import {sort} from '../utils/sort.js';
 
 export default class Presenter {
 
@@ -16,7 +18,7 @@ export default class Presenter {
 
   #pointListView = new pointListView();
   #noTasksView = new NoTasksView();
-  #sortView = new Sortview();
+  #sortView = null;
 
   /**
    * @type PointsModel
@@ -32,6 +34,11 @@ export default class Presenter {
    * @type Map<string, PointPresenter>
    */
   #pointPresenters = new Map();
+
+  /**
+   * @type string
+   */
+  #currentSortType = SortType.DAY;
 
 
   /**
@@ -65,6 +72,10 @@ export default class Presenter {
   }
 
   #renderSort() {
+    this.#sortView = new Sortview({
+      filterNames: Object.entries(SortType).map(([_, value]) => value),
+      onSortTypeChange: this.#sortTypeChangeHandler
+    });
     render(this.#sortView, this.#container);
   }
 
@@ -88,6 +99,13 @@ export default class Presenter {
     this.#pointPresenters.clear();
   }
 
+  #sortPoints(sortType) {
+    const sortCallback = sort[sortType];
+    this.#points.sort(sortCallback);
+
+    this.#currentSortType = sortType;
+  }
+
   init() {
     this.#points = [...this.#pointsModel.points];
 
@@ -101,5 +119,15 @@ export default class Presenter {
 
   #modeChangeHandler = () => {
     this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #sortTypeChangeHandler = (sortType) => {
+    if (sortType !== this.#currentSortType) {
+      this.#sortPoints(sortType);
+      this.#clearPoints();
+      this.#renderPoints();
+
+
+    }
   };
 }
