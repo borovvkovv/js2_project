@@ -11,19 +11,12 @@ import {sort} from '../utils/sort.js';
 
 export default class Presenter {
 
-  /**
-   * @type Element
-   */
-  #container = null;
+  #container;
+  #pointsModel;
 
   #pointListView = new pointListView();
   #noTasksView = new NoTasksView();
   #sortView = null;
-
-  /**
-   * @type PointsModel
-   */
-  #pointsModel = null;
 
   /**
    * @type Point[]
@@ -40,23 +33,20 @@ export default class Presenter {
    */
   #currentSortType = SortType.DAY;
 
-
   /**
    * @param {Object} params
-   * @param {Element} params.container
+   * @param {HTMLElement} params.container
    * @param {PointsModel} params.pointsModel
    */
   constructor({container, pointsModel}) {
-    this.#pointsModel = pointsModel;
     this.#container = container;
+    this.#pointsModel = pointsModel;
   }
 
-  /**
-   *
-   * @param {Point} point
-   */
+  /** @param {Point} point */
   #renderPoint(point) {
     const pointPresenter = new PointPresenter({
+      point,
       pointsModel: this.#pointsModel,
       pointsListContainer: this.#pointListView.element,
       onDataChange: this.#pointChangeHandler,
@@ -64,7 +54,7 @@ export default class Presenter {
     });
 
     pointPresenter.init(point);
-    this.#pointPresenters.set(point.id, pointPresenter);
+    this.#pointPresenters.set(String(point.id), pointPresenter);
   }
 
   #renderNoPoints() {
@@ -73,7 +63,7 @@ export default class Presenter {
 
   #renderSort() {
     this.#sortView = new Sortview({
-      filterNames: Object.entries(SortType).map(([_, value]) => value),
+      filterNames: Object.entries(SortType).map(([, value]) => value),
       onSortTypeChange: this.#sortTypeChangeHandler
     });
     render(this.#sortView, this.#container);

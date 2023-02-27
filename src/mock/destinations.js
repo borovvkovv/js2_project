@@ -1,3 +1,6 @@
+/**
+ * @type {Destination[]}
+ */
 export const destinations =
   [
     {

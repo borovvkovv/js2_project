@@ -13,6 +13,14 @@ export default class PointsModel {
     return this.#points.slice(0, 9);
   }
 
+  get destinations() {
+    return this.#destinations;
+  }
+
+  get offers() {
+    return this.#offers;
+  }
+
   getDestinationById(id) {
     return this.#destinations.find((item) => item.id === id);
   }
@@ -22,7 +30,7 @@ export default class PointsModel {
   }
 
   getCitiesNames() {
-    return [...new Set(this.#destinations.map((destination) => destination.name))];
+    return this.#destinations.map((destination) => destination.name);
   }
 
 }

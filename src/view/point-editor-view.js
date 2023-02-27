@@ -1,6 +1,6 @@
 import {pointTypes} from '../mock/enums';
 import dayjs from 'dayjs';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 
 /**
  * @returns string
@@ -60,15 +60,13 @@ function getCities(cities) {
 
 /**
  * @param {object} param
- * @param {Point} param.point
- * @param {Destination} param.destination
- * @param {OffersWithCheck[]} param.offers
+ * @param {PointViewState} param.point
  * @param {boolean} param.isNew
- * @param {string[]} param.cities
+ * @param {string[]} param.cityNames
  * @returns string
  */
-function createPointEditorTemplate({point, destination, offers, isNew, cities}) {
-  const {basePrice, dateFrom, dateTo, type} = point;
+function createPointEditorTemplate({point, isNew, cityNames}) {
+  const {basePrice, dateFrom, dateTo, type, offers, destination} = point;
 
   return `
     <li class="trip-events__item">
@@ -99,7 +97,7 @@ function createPointEditorTemplate({point, destination, offers, isNew, cities}) 
             <label class="event__label  event__type-output" for="event-destination-1">${type}</label>
             <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
             <datalist id="destination-list-1">
-              ${getCities(cities)}
+              ${getCities(cityNames)}
             </datalist>
           </div>
 
@@ -171,68 +169,134 @@ function createPointEditorTemplate({point, destination, offers, isNew, cities}) 
     </li>`;
 }
 
-export default class PointEditorView extends AbstractView {
+export default class PointEditorView extends AbstractStatefulView {
 
-  #point;
-  #destination;
-  #offers;
-  #cities;
+  #cityNames;
   #isNew;
-  #handleFormSubmit;
-  #handleRollupBtnClick;
+  #destination;
+  #destinations;
+  #offers;
+  #offersByType;
+  #submitHandler;
+  #clickHandler;
 
   /**
    * @param {Object} param
    * @param {Point} param.point
-   * @param {OffersWithCheck[]} param.offers
    * @param {Destination} param.destination
-   * @param {string[]} param.cities
+   * @param {string[]} param.cityNames
    * @param {boolean} param.isNew
+   * @param {Destination[]} param.destinations
+   * @param {OffersByType[]} param.offers
+   * @param {OnSubmitHandler} param.onSubmit
+   * @param {OnClickHandler} param.onClick
    */
-  constructor({point, offers, destination, cities, isNew, onFormSubmit, onRollupBtnClick}) {
+  constructor({point, destination, cityNames, isNew, destinations, offers, onSubmit, onClick}) {
     super();
 
-    this.#point = point;
-    this.#destination = destination;
-    this.#offers = offers;
-    this.#cities = cities;
-    this.#isNew = isNew;
-    this.#handleFormSubmit = onFormSubmit;
-    this.#handleRollupBtnClick = onRollupBtnClick;
+    this.#offersByType = offers.find((item) => item.type === point.type).offers;
 
-    this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupBtnClickHandler);
+    this._setState(PointEditorView.parsePointToState(point, destination, this.#offersByType));
+    this.#cityNames = cityNames;
+    this.#isNew = isNew;
+    this.#destination = destination;
+    this.#destinations = destinations;
+    this.#offers = offers;
+    this.#submitHandler = onSubmit;
+    this.#clickHandler = onClick;
+
+    this._restoreHandlers();
   }
 
   get template() {
     return createPointEditorTemplate({
-      point: this.#point,
-      destination: this.#destination,
-      offers: this.#offers,
+      point: this._state,
       isNew: this.#isNew,
-      cities: this.#cities
+      cityNames: this.#cityNames
     });
   }
 
-  #formSubmitHandler = (evt) => {
+  _restoreHandlers() {
+    this.element.querySelector('form').addEventListener('submit', this.#handleSubmit);
+    this.element.addEventListener('click', this.#handleClick);
+    this.element.querySelectorAll('.event__type-input').forEach((e) => e.addEventListener('change', this.#pointTypeChangeHandler));
+  }
+
+  /**
+   * @param {Point} point
+   */
+  reset(point, destination, offersByType) {
+    this.updateElement(PointEditorView.parsePointToState(point, destination, offersByType));
+  }
+
+  /**
+   * @param {Point} point
+   * @param {Destination} destination
+   * @param {Offer[]} offersByType
+   * @returns {PointViewState}
+   */
+  static parsePointToState(point, destination, offersByType) {
+    return { ...point,
+      destination,
+      offers: offersByType.map((offerByType) => ({
+        offer: offerByType,
+        checked: point.offers.includes(offerByType.id)
+      }))
+    };
+  }
+
+  /**
+   * @param {PointViewState} state
+   * @returns {Point}
+   */
+  static parseStateToPoint(state) {
+    return { ...state,
+      destination: state.destination.id,
+      offers: state.offers.filter((offer) => offer.checked).map((offer) => offer.offer.id)
+    };
+  }
+
+  /** @param {SubmitEvent} evt */
+  #handleSubmit = (evt) => {
     evt.preventDefault();
 
-    const newPoint = {
-      'id': this.#point.id,
-      'basePrice': Number.parseInt(this.element.querySelector('#event-price-1').value, 10),
-      'dateFrom': Date(this.element.querySelector('#event-start-time-1').value),
-      'dateTo': Date(this.element.querySelector('#event-end-time-1').value),
-      'destination': this.element.querySelector('#event-destination-1').value,
-      'offers': [...this.element.querySelectorAll('.event__offer-checkbox:checked')].map((element) => Number(element.id)),
-      'type': this.element.querySelector('.event__type-output').textContent
-    };
+    //@ts-ignore
+    const checkedOfferIds = [this.element.querySelectorAll('.event__offer-checkbox:checked')].map((element) => Number(element.id));
+    // @ts-ignore
+    this._state.basePrice = Number.parseInt(this.element.querySelector('#event-price-1').value, 10);
+    // @ts-ignore
+    this._state.dateFrom = Date.parse(this.element.querySelector('#event-start-time-1').value);
+    // @ts-ignore
+    this._state.dateTo = Date.parse(this.element.querySelector('#event-end-time-1').value);
+    // @ts-ignore
+    this._state.destination = this.#destinations.find((d) => d.name === this.element.querySelector('#event-destination-1').value).id;
+    this._state.offers = this._state.offers.map((offer) => offer.checked === checkedOfferIds.includes(offer.offer.id));
+    this._state.type = this.element.querySelector('.event__type-output').textContent;
 
-    this.#handleFormSubmit(newPoint);
+    this.#submitHandler(PointEditorView.parseStateToPoint(this._state));
   };
 
-  #rollupBtnClickHandler = (evt) => {
+  /** @param {MouseEvent & {target: Element}} evt */
+  #handleClick = (evt) => {
+    if (evt.target.closest('.event__rollup-btn')) {
+      evt.preventDefault();
+      this.#clickHandler();
+    }
+  };
+
+  #pointTypeChangeHandler = (evt) => {
     evt.preventDefault();
-    this.#handleRollupBtnClick();
+
+    const newPointType = this.element.querySelector('.event__type-input:checked').value;
+    const offersByType = this.#offers.find((item) => item.type === newPointType).offers;
+
+    this.updateElement({
+      type: newPointType,
+      offers: offersByType.map((offerByType) => ({
+        offer: offerByType,
+        checked: false
+      }))
+    });
   };
 
 }

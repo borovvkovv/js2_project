@@ -64,5 +64,44 @@
  */
 
 /**
+ * @callback OnSubmitHandler
+ * @param {Point} point
+ * @returns {void}
+ */
+
+/**
+ * @callback OnClickHandler
+ * @returns {void}
+ */
+
+/**
+ * @callback OnDataChangeHandler
+ * @param {Point} point
+ * @returns {void}
+ */
+
+/**
+ * @callback OnModeChangeHandler
+ * @returns {void}
+ */
+
+/**
+ * @callback OnSortTypeChangeHandler
+ * @param {string} sortType
+ * @returns {void}
+ */
+
+/**
  * @typedef {import('./model/points-model').default} PointsModel
+ */
+
+/**
+ * @typedef PointViewState
+ * @property {number} basePrice
+ * @property {string} dateFrom
+ * @property {string} dateTo
+ * @property {Destination} destination
+ * @property {number} id
+ * @property {OffersWithCheck[]} offers
+ * @property {string} type
  */

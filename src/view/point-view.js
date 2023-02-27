@@ -1,9 +1,14 @@
 import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
 
-function getOffers(offers, checkedOffers) {
-  return offers.map((offer) =>
-    checkedOffers.includes(offer.id)
+/**
+ * @param {Offer[]} offersByType
+ * @param {number[]} pointOfferIds
+ * @returns {string}
+ */
+function getOffers(offersByType, pointOfferIds) {
+  return offersByType.map((offer) =>
+    pointOfferIds.includes(offer.id)
       ? `<li class="event__offer">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -13,7 +18,13 @@ function getOffers(offers, checkedOffers) {
   ).join('');
 }
 
-function createPointTemplate(point, offers, destination) {
+/**
+ * @param {Point} point
+ * @param {Offer[]} offersByType
+ * @param {Destination} destination
+ * @returns {string}
+ */
+function createPointTemplate(point, offersByType, destination) {
   const {basePrice, dateFrom, dateTo, type} = point;
 
   return `
@@ -36,7 +47,7 @@ function createPointTemplate(point, offers, destination) {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${getOffers(offers, point.offers)}
+        ${getOffers(offersByType, point.offers)}
       </ul>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
@@ -48,34 +59,41 @@ function createPointTemplate(point, offers, destination) {
 export default class PointView extends AbstractView {
 
   #point;
-  #offers;
+  #offersByType;
   #destination;
-  #handleRollupBtnClick;
+  #clickHandler;
 
   /**
    * @param {object} param
    * @param {Point} param.point
    * @param {Destination} param.destination
-   * @param {Offers[]} param.offers
+   * @param {Offer[]} param.offersByType
+   * @param {OnClickHandler} param.onClick
    */
-  constructor({point, destination, offers, onRollupBtnClick}) {
+  constructor({point, destination, offersByType, onClick}) {
     super();
 
     this.#point = point;
-    this.#offers = offers;
     this.#destination = destination;
-    this.#handleRollupBtnClick = onRollupBtnClick;
+    this.#offersByType = offersByType;
+    this.#clickHandler = onClick;
 
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollupBtnClickHandler);
+    this.element.addEventListener('click', this.#handleClick);
   }
 
   get template() {
-    return createPointTemplate(this.#point, this.#offers, this.#destination);
+    return createPointTemplate(this.#point, this.#offersByType, this.#destination);
   }
 
-  #rollupBtnClickHandler = (evt) => {
+  /**
+   * @param {MouseEvent & {target: Element}} evt
+   */
+  #handleClick = (evt) => {
     evt.preventDefault();
-    this.#handleRollupBtnClick();
+
+    if (evt.target.closest('.event__rollup-btn')) {
+      this.#clickHandler();
+    }
   };
 
 }

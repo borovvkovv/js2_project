@@ -9,20 +9,11 @@ const Mode = {
 
 export default class PointPresenter {
 
-  /**
-   * @type Point
-   */
-  #point = null;
+  /** @type {Point} */
+  #point;
 
-  /**
-   * @type PointsModel
-   */
-  #pointsModel = null;
-
-  /**
-   * @type Element
-   */
-  #pointsListContainer = null;
+  #pointsModel;
+  #pointsListContainer;
 
   /**
    * @type PointEditorView
@@ -36,12 +27,16 @@ export default class PointPresenter {
 
   #mode = Mode.DEFAULT;
 
-  #dataChangeHandler = null;
-  #modeChangeHandler = null;
+  #dataChangeHandler;
+  #modeChangeHandler;
 
   /**
    * @param {object} params
+   * @param {Point} params.point
    * @param {PointsModel} params.pointsModel
+   * @param {HTMLElement} params.pointsListContainer
+   * @param {OnDataChangeHandler} params.onDataChange
+   * @param {OnModeChangeHandler} params.onModeChange
    */
   constructor({pointsModel, pointsListContainer, onDataChange, onModeChange}) {
     this.#pointsModel = pointsModel;
@@ -50,10 +45,7 @@ export default class PointPresenter {
     this.#modeChangeHandler = onModeChange;
   }
 
-  /**
-   *
-   * @param {Point} point
-   */
+  /** @param {Point} point */
   init(point) {
     this.#point = point;
 
@@ -63,23 +55,19 @@ export default class PointPresenter {
     this.#pointCard = new PointView({
       point,
       destination: this.#pointsModel.getDestinationById(point.destination),
-      offers: this.#pointsModel.getOffersByType(point.type),
-      onRollupBtnClick: this.#cardRollupBtnClickHandler
+      offersByType: this.#pointsModel.getOffersByType(point.type),
+      onClick: this.#handlePointCardClick
     });
 
     this.#pointEditor = new PointEditorView({
       point,
-      offers: this.#pointsModel.getOffersByType(point.type)
-        .map((offer) =>
-          ({
-            checked: point.offers.includes(offer.id),
-            offer
-          })),
       destination: this.#pointsModel.getDestinationById(point.destination),
-      cities: this.#pointsModel.getCitiesNames(),
+      cityNames: this.#pointsModel.getCitiesNames(),
       isNew: false,
-      onFormSubmit: this.#formSubmitHandler,
-      onRollupBtnClick: this.#formRollupBtnClickHandler
+      destinations: this.#pointsModel.destinations,
+      offers: this.#pointsModel.offers,
+      onSubmit: this.#handlePointEditorSubmit,
+      onClick: this.#handlePointEditorClick
     });
 
     if (prevPointCard === null || prevPointEditor === null) {
@@ -107,6 +95,7 @@ export default class PointPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#pointEditor.reset(this.#point, this.#pointsModel.getDestinationById(this.#point.destination), this.#pointsModel.offers.find((item) => item.type === this.#point.type).offers);
       this.#replaceFormToCard();
     }
   }
@@ -119,13 +108,16 @@ export default class PointPresenter {
   }
 
   #replaceFormToCard() {
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
     replace(this.#pointCard, this.#pointEditor);
     this.#mode = Mode.DEFAULT;
+
   }
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#pointEditor.reset(this.#point, this.#pointsModel.getDestinationById(this.#point.destination), this.#pointsModel.offers.find((item) => item.type === this.#point.type).offers);
       this.#replaceFormToCard.call(this);
     }
   };
@@ -133,19 +125,17 @@ export default class PointPresenter {
   /**
    * @param {Point} point
    */
-  #formSubmitHandler = (point) => {
+  #handlePointEditorSubmit = (point) => {
     this.#replaceFormToCard.call(this);
     this.#dataChangeHandler(point);
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
-  #cardRollupBtnClickHandler = () => {
+  #handlePointCardClick = () => {
     this.#replaceCardToForm.call(this);
   };
 
-  #formRollupBtnClickHandler = () => {
+  #handlePointEditorClick = () => {
     this.#replaceFormToCard.call(this);
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
 
 }
