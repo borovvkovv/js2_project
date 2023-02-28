@@ -105,3 +105,8 @@
  * @property {OffersWithCheck[]} offers
  * @property {string} type
  */
+
+/**
+ * @typedef {import('node_modules/flatpickr/dist/types/instance').Instance} Calendar
+ * @typedef {import ('node_modules/flatpickr/dist/types/options').Options} CalendarConfig
+ */

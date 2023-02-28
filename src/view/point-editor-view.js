@@ -1,6 +1,8 @@
 import {pointTypes} from '../mock/enums';
 import dayjs from 'dayjs';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 /**
  * @returns string
@@ -145,12 +147,13 @@ function createPointEditorTemplate({point, isNew, cityNames}) {
 
         </header>
         <section class="event__details">
+          ${offers.length === 0 ? '' : `
           <section class="event__section  event__section--offers">
             <h3 class="event__section-title  event__section-title--offers">Offers</h3>
             <div class="event__available-offers">
               ${getOffers(offers)}
             </div>
-          </section>
+          </section>`}
 
           <section class="event__section  event__section--destination">
             <h3 class="event__section-title  event__section-title--destination">Destination</h3>
@@ -179,6 +182,16 @@ export default class PointEditorView extends AbstractStatefulView {
   #offersByType;
   #submitHandler;
   #clickHandler;
+
+  /**
+   * @type Calendar
+   */
+  #datepickerStart = null;
+
+  /**
+   * @type Calendar
+   */
+  #datepickerEnd = null;
 
   /**
    * @param {Object} param
@@ -220,6 +233,10 @@ export default class PointEditorView extends AbstractStatefulView {
     this.element.querySelector('form').addEventListener('submit', this.#handleSubmit);
     this.element.addEventListener('click', this.#handleClick);
     this.element.querySelectorAll('.event__type-input').forEach((e) => e.addEventListener('change', this.#pointTypeChangeHandler));
+
+    this.#setDatepicker();
+
+    this.element.addEventListener('keydown', this.#keyDownHandler, true);
   }
 
   /**
@@ -227,6 +244,20 @@ export default class PointEditorView extends AbstractStatefulView {
    */
   reset(point, destination, offersByType) {
     this.updateElement(PointEditorView.parsePointToState(point, destination, offersByType));
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
   }
 
   /**
@@ -256,22 +287,52 @@ export default class PointEditorView extends AbstractStatefulView {
     };
   }
 
+  #setDatepicker() {
+    this.#datepickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        enableTime: true,
+        monthSelectorType: 'static',
+        static: true,
+        dateFormat: 'd/m/y H:i',
+        locale: {firstDayOfWeek: 1},
+        'time_24hr': true,
+        onChange: ([value]) => this.#datepickerEnd.set('minDate', value)
+      }
+    );
+
+    this.#datepickerEnd = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        enableTime: true,
+        monthSelectorType: 'static',
+        static: true,
+        dateFormat: 'd/m/y H:i',
+        locale: {firstDayOfWeek: 1},
+        'time_24hr': true,
+        onChange: ([value]) => this.#datepickerStart.set('maxDate', value)
+      }
+    );
+  }
+
   /** @param {SubmitEvent} evt */
   #handleSubmit = (evt) => {
     evt.preventDefault();
 
     //@ts-ignore
     const checkedOfferIds = [this.element.querySelectorAll('.event__offer-checkbox:checked')].map((element) => Number(element.id));
-    // @ts-ignore
-    this._state.basePrice = Number.parseInt(this.element.querySelector('#event-price-1').value, 10);
-    // @ts-ignore
-    this._state.dateFrom = Date.parse(this.element.querySelector('#event-start-time-1').value);
-    // @ts-ignore
-    this._state.dateTo = Date.parse(this.element.querySelector('#event-end-time-1').value);
-    // @ts-ignore
-    this._state.destination = this.#destinations.find((d) => d.name === this.element.querySelector('#event-destination-1').value).id;
-    this._state.offers = this._state.offers.map((offer) => offer.checked === checkedOfferIds.includes(offer.offer.id));
-    this._state.type = this.element.querySelector('.event__type-output').textContent;
+
+    this._setState({...this._state,
+      // @ts-ignore
+      basePrice: Number.parseInt(this.element.querySelector('#event-price-1').value, 10),
+      // @ts-ignore
+      dateFrom: Date.parse(this.element.querySelector('#event-start-time-1').value),
+      // @ts-ignore
+      dateTo: Date.parse(this.element.querySelector('#event-end-time-1').value),
+      // @ts-ignore
+      destination: this.#destinations.find((d) => d.name === this.element.querySelector('#event-destination-1').value).id,
+      offers: this._state.offers.map((offer) => offer.checked === checkedOfferIds.includes(offer.offer.id))
+    });
 
     this.#submitHandler(PointEditorView.parseStateToPoint(this._state));
   };
@@ -287,6 +348,7 @@ export default class PointEditorView extends AbstractStatefulView {
   #pointTypeChangeHandler = (evt) => {
     evt.preventDefault();
 
+    //@ts-ignore
     const newPointType = this.element.querySelector('.event__type-input:checked').value;
     const offersByType = this.#offers.find((item) => item.type === newPointType).offers;
 
@@ -297,6 +359,19 @@ export default class PointEditorView extends AbstractStatefulView {
         checked: false
       }))
     });
+  };
+
+  /**
+   *
+   * @param {KeyboardEvent} evt
+   */
+  #keyDownHandler = (evt) => {
+    if (evt.key === 'Escape' && (this.#datepickerStart.isOpen || this.#datepickerEnd.isOpen)) {
+      evt.stopPropagation();
+
+      this.#datepickerStart.close();
+      this.#datepickerEnd.close();
+    }
   };
 
 }

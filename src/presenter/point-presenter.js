@@ -96,28 +96,26 @@ export default class PointPresenter {
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
       this.#pointEditor.reset(this.#point, this.#pointsModel.getDestinationById(this.#point.destination), this.#pointsModel.offers.find((item) => item.type === this.#point.type).offers);
-      this.#replaceFormToCard();
     }
   }
 
   #replaceCardToForm() {
     replace(this.#pointEditor, this.#pointCard);
     document.addEventListener('keydown', this.#escKeyDownHandler, {once: true});
-    this.#modeChangeHandler();
     this.#mode = Mode.EDITING;
+    this.#modeChangeHandler();
   }
 
   #replaceFormToCard() {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     replace(this.#pointCard, this.#pointEditor);
     this.#mode = Mode.DEFAULT;
-
+    this.#modeChangeHandler();
   }
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      this.#pointEditor.reset(this.#point, this.#pointsModel.getDestinationById(this.#point.destination), this.#pointsModel.offers.find((item) => item.type === this.#point.type).offers);
       this.#replaceFormToCard.call(this);
     }
   };
