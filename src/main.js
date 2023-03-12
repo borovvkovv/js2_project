@@ -1,15 +1,62 @@
 import Presenter from './presenter/presenter';
 import PointsModel from './model/points-model';
-import {render} from './framework/render.js';
-import FilterView from './view/filter-view';
-import {generateFilters} from './mock/filter';
+import FilterModel from './model/filter-model';
+import FilterPresenter from './presenter/filter-presenter';
+import NewPointButtonView from './view/new-point-button-view';
+import {render} from './framework/render';
+import PointsApiService from './points-api-service';
 
-const pointsModel = new PointsModel();
+const END_POINT = 'https://19.ecmascript.pages.academy/big-trip-simple';
+const AUTHORIZATION = 'Basic gtfhxbdftghbzdfz';
+const pointsModel = new PointsModel({
+  pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION)
+});
+const filterModel = new FilterModel();
 
-const test = generateFilters(pointsModel.points);
-render(new FilterView(test), document.body.querySelector('.trip-controls__filters'));
+/**@type {HTMLElement} */
+const pointsContainer = document.body.querySelector('.trip-events');
 
-const container = document.body.querySelector('.trip-events');
-const presenter = new Presenter({container, pointsModel});
+/**@type {HTMLElement} */
+const filterContainer = document.querySelector('.trip-controls__filters');
 
+/**@type {HTMLElement} */
+const sortContainer = document.querySelector('.trip-events');
+
+/**@type {HTMLElement} */
+const newPointButtonContainer = document.querySelector('.trip-main');
+
+const filterPresenter = new FilterPresenter({
+  filterContainer,
+  filterModel,
+  pointsModel
+});
+
+const presenter = new Presenter({
+  pointsContainer,
+  sortContainer,
+  pointsModel,
+  filterModel,
+  onNewPointDestroy: handleNewPointFormClose
+});
+
+const newPointButtonView = new NewPointButtonView({
+  onClick: handleNewPointButtonClick
+});
+
+filterPresenter.init();
 presenter.init();
+pointsModel
+  .init()
+  .finally(() => render(newPointButtonView, newPointButtonContainer));
+
+function handleNewPointFormClose() {
+  //@ts-ignore
+  newPointButtonView.element.disabled = false;
+}
+
+function handleNewPointButtonClick() {
+  presenter.createPoint();
+
+  //@ts-ignore
+  newPointButtonView.element.disabled = true;
+}

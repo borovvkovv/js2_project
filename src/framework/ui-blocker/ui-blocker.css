@@ -25,6 +25,7 @@
 
 .ui-blocker--on {
   display: grid;
+  position: fixed;
 }
 
 @keyframes rotate {

@@ -2,11 +2,11 @@ import {filter} from '../utils/filter.js';
 
 /**
  * @param {Point[]} points
- * @return {filterState[]}
+ * @return {FilterState[]}
  */
 export const generateFilters = (points) =>
   Object.entries(filter).map(
-    ([filterName, filteredPoints]) => ({
-      name: filterName,
-      isAnyPoints: filteredPoints(points).length > 0
+    ([filterName, filterCallback]) => ({
+      filterName: filterName,
+      isAnyPoints: points.filter(filterCallback).length > 0
     }));

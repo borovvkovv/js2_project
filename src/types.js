@@ -1,8 +1,29 @@
 /**
  * @typedef Point
  * @property {number} basePrice
- * @property {string} dateFrom
- * @property {string} dateTo
+ * @property {string} startDate
+ * @property {string} endDate
+ * @property {number} destinationId
+ * @property {number} id
+ * @property {number[]} offerIds
+ * @property {string} type
+ */
+
+/**
+ * @typedef LocalPoint
+ * @property {number} basePrice
+ * @property {string} startDate
+ * @property {string} endDate
+ * @property {number} destinationId
+ * @property {number[]} offerIds
+ * @property {string} type
+ */
+
+/**
+ * @typedef ServerPoint
+ * @property {number} base_price
+ * @property {string} date_from
+ * @property {string} date_to
  * @property {number} destination
  * @property {number} id
  * @property {number[]} offers
@@ -45,15 +66,16 @@
 ////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * @typedef filterState
+ * @typedef FilterState
+ * @property {string} filterType
  * @property {string} filterName
  * @property {boolean} isAnyPoints
  */
 
 /**
  * @callback FilterCallback
- * @param {Point[]} points
- * @return {Point[]}
+ * @param {Point} points
+ * @return {boolean}
  */
 
 /**
@@ -76,7 +98,9 @@
 
 /**
  * @callback OnDataChangeHandler
- * @param {Point} point
+ * @param {string} userAction
+ * @param {string} UpdateType
+ * @param {Point} update
  * @returns {void}
  */
 
@@ -92,18 +116,41 @@
  */
 
 /**
+ * @callback onFilterChangeHandler
+ * @param {string} filterType
+ * @returns {void}
+ */
+
+/**
+ * @callback OnNewPointDestroy
+ * @returns {void}
+ */
+
+/**
+ * @callback OnDeleteHandler
+ * @param {Point}
+ * @returns {void}
+ */
+
+/**
  * @typedef {import('./model/points-model').default} PointsModel
+ * @typedef {import('./model/filter-model').default} FilterModel
+ *
+ @typedef {import('./points-api-service').default} PointsApiService
  */
 
 /**
  * @typedef PointViewState
  * @property {number} basePrice
- * @property {string} dateFrom
- * @property {string} dateTo
+ * @property {Date} dateFrom
+ * @property {Date} dateTo
  * @property {Destination} destination
  * @property {number} id
  * @property {OffersWithCheck[]} offers
  * @property {string} type
+ * @property {boolean} isDisabled
+ * @property {boolean} isSaving
+ * @property {boolean} isDeleting
  */
 
 /**

@@ -10,6 +10,15 @@ export function getRandomItem(array) {
   return array[getRandomNumber(0, maxIndex)];
 }
 
-export function updateItem(items, update) {
-  return items.map((item) => item.id === update.id ? update : item);
+export function convertDateToString(date) {
+  const timezoneOffset = date.getTimezoneOffset() * 60000;
+  const dateExceptTimeZone = date.getTime() - timezoneOffset;
+  return new Date(dateExceptTimeZone).toISOString();
+}
+
+export function convertStringToDate(dateString) {
+  const date = new Date(dateString);
+  const userTimezoneOffset = date.getTimezoneOffset() * 60000;
+  const dateExceptTimeZone = date.getTime() + userTimezoneOffset;
+  return new Date(dateExceptTimeZone);
 }

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import AbstractView from '../framework/view/abstract-view.js';
+import {convertStringToDate} from '../utils/common.js';
 
 /**
  * @param {Offer[]} offersByType
@@ -25,7 +26,7 @@ function getOffers(offersByType, pointOfferIds) {
  * @returns {string}
  */
 function createPointTemplate(point, offersByType, destination) {
-  const {basePrice, dateFrom, dateTo, type} = point;
+  const {basePrice, startDate: dateFrom, endDate: dateTo, type} = point;
 
   return `
   <li class="trip-events__item">
@@ -37,9 +38,9 @@ function createPointTemplate(point, offersByType, destination) {
       <h3 class="event__title">${type} ${destination.name}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${dayjs(dateFrom).format('YYYY-MM-DDThh:mm')}">${dayjs(dateFrom).format('hh:mm')}</time>
+          <time class="event__start-time" datetime="${dayjs(dateFrom).format('YYYY-MM-DDTHH:mm')}">${dayjs(dateFrom).format('HH:mm')}</time>
           &mdash;
-          <time class="event__end-time" datetime="${dayjs(dateTo).format('YYYY-MM-DDThh:mm')}">${dayjs(dateTo).format('hh:mm')}</time>
+          <time class="event__end-time" datetime="${dayjs(dateTo).format('YYYY-MM-DDTHH:mm')}">${dayjs(dateTo).format('HH:mm')}</time>
         </p>
       </div>
       <p class="event__price">
@@ -47,7 +48,7 @@ function createPointTemplate(point, offersByType, destination) {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${getOffers(offersByType, point.offers)}
+        ${getOffers(offersByType, point.offerIds)}
       </ul>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
